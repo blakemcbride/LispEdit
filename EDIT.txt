@@ -1,0 +1,131 @@
+
+EDIT - Structure editor for Common Lisp
+
+This code was taken from the LISPF4 project and was enhanced and
+converted to Common Lisp by Blake McBride.  The LISPF4 editor is an
+implementation of the structure editor that came with InterLisp.
+
+In order for editing of functions to work, they must have been defined
+using the "defun" or "defmacro" defined in this package.
+
+Note that indexing of n'th element begins at 1, not 0.
+
+ 
+Several edit functions are implemented:
+ 
+        (EDITF fn edcom)      edit a function or macro.  Value = NIL.
+        (EDITS s edcom)       edit any s-expr.  Value = s
+	(EDITV v edcom)       edit variable v
+	(EDITP s edcom)       edit the property list associated with s
+                              edcom = list of edit commands
+                              (or NIL).  If edcom is non-NIL the commands
+	                      will be executed and the editor will exit.
+
+In what follows cexpr is the current expression.
+ 
+The following commands are implemented.
+
+        OK               Saves the changes and leaves the editor
+	STOP             Exits the editor without saving
+	SAVE             Saves edit for future edit session (only EDITF)
+ 
+Display:
+
+        P                Print to level 2
+        PP               PrettyPrint to level 2
+        ?                Print to level 100
+        ??               PrettyPrint to level 100
+
+Positioning the cexpr:
+ 
+        !                sets cexpr to top level expression
+        n                Set cexpr to the n'th element of cexpr.
+        -n               Set cexpr to the n'th element from the end of cexpr.
+	0                ascend one level.
+        NX               next expression
+	                 (descend to the next element one level above)
+        UP               Ascend one level but only display elements to the
+	                 right of the original cexpr.
+        F expr           searches the first occurrence of expr
+                         in the cexpr regardless of level
+
+        (MARK atm)       Set atom atm to the current edit position.
+	(/ atm)	         Go to position marked by atom atm
+
+Expression editing:
+
+  Adds:
+        (-n e1 ...)      inserts e1 ... before the n'th element.
+        (N e1 ...)       adds e1 ... after the last element within cexpr.
+	(A e1 ...)       Adds e1 ... AFTER cexpr.
+	(B e1 ...)       Adds e1 ... BEFORE cexpr.
+  Replacing:
+        (n e1 ...)       n >= 1 replaces the n'th expression by e1 ...
+        (: e1 ...)       Replaces the entire current expression by e1 ...
+        (R x y)          All occurrences of x are replaced by y in cexpr.
+        (MBD e1 ...)     Replace cexpr with e1 ... and allow * to represent
+	                 the original expression.
+	                 Ex.:  We have (PRINT X) and we want
+                               (COND ((NULL L) (PRINT X) NIL)
+                                     (T (PRINT X) (GO LOP)))
+                               we do
+                               (MBD (COND ((NULL L) * NIL)
+                                          (T * (GO LOP))))
+        (XTR e1 ...)     Ex.:  We have (COND ((NULL L) NIL)
+                                             (T (PRINT L))
+                               and we want (PRINT L)
+                               we do
+                               (XTR 3 2), (XTR (PRINT L)) or
+                               (XTR PRINT)
+
+  Deletions:
+        (n)              n >= 1 deletes the n'th expression of cexpr
+	(:)              Delete the current expression.
+
+  Global editing:
+
+        S x              Set x to the current expression.
+	(US x cmds)      Execute edit commands cmds with the ability to
+	                 utilize the expression in atom x
+	S and US can be used in different edit sessions.
+ 
+	Ex.:  Move the PROG expression of FOO to be the PROG expression of
+	another function FII.
+ 
+		(EDITF FOO)
+		F PROG S DEF OK
+		(EDITF FII)
+		(US DEF (3 DEF)) OK
+ 
+	The 3'rd element (the prog expression of FII) is replaced by the one
+	stored in DEF.
+
+Parenthesis manipulation:
+
+        (BI n m)         Both In.  A left parenthesis is inserted before
+                         the n'th element and a right parenthesis is
+                         inserted after the m'th element.
+	(BI n)           insert parenthesis around the n'th element
+        (BO n)           Both Out.  Removes both parenthesis from the
+                         n'th element.
+        (LI n)           Left In.  Inserts a left parenthesis before the
+                         n'th element and a corresponding right at the end
+        (LO n)           Left Out.  Removes the left parenthesis from the
+	                 n'th element.  All elements after the n'th element
+	                 are deleted.
+        (RI n m)         Right In.  Move the parenthesis at the end of the
+	                 n'th element in to after the m'th element inside
+			 the n'th element.
+        (RO n)           Right Out.  Move the right parenthesis of the n'th
+	                 element to the end of the current expression.  All
+	                 elements following the n'th element are moved
+	                 inside the n'th element.
+
+Evaluation:
+
+	E expr           Evaluate expression expr.
+
+	(ESET x c1...)   Sets atom x to the edit commands c1...
+	x                Executes the edit commands associates with atom x.
+	(ESET x)         Disassociates all edit commands from atom x.
+ 

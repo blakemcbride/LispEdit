@@ -1,0 +1,55 @@
+A popular development scenario that I term "disk based" looks like the
+following:
+
+A.  A program is created / edited with a text editor (like emacs)
+
+B.  The code is saved to a disk file (like myprogram.lisp )
+
+C.  A language interpreter / compiler loads (from disk or a socket)
+and runs the code where the programmer evaluates its performance
+
+D.  Go back to A.
+
+---
+
+There is another development scenario that is old, but may be worth
+looking into.  I term this other method "image based" and it looks
+like the following:
+
+1. Code is added and edited right in the environment where it is being
+used (like CCL, SBCL, CLISP, etc.).  Editing the code could be done
+with an editor like a structure editor written in Lisp rather than a
+text editor.
+
+2. Run the code right in the environment it was created in.
+
+3. Go to step 1 in order to continue development.
+
+Also:
+
+4.  The state of the project can be saved as an image file
+representing the entire project when necessary  (i.e. CLISP .mem file,
+SBCL and CMUCL .core file, CCL image file, etc.).
+
+5.  A disk / text form of the application can also be created for
+reference or porting whenever needed  (like mypackage.lisp ).
+
+Languages that use this latter model include Smalltalk and InterLisp.
+
+---
+
+In order to do image based development in Common Lisp, certain tools
+are needed:
+
+a.  A way of editing a program, like a structure editor
+
+b.  A way of writing a text form of the application when desired (item
+5 above)
+
+c.  The interpreter / compiler should be able to save / load an image
+
+I have completed item "a".  Item "b" is rudimentary.  Item "c"
+is already included in many Lisp interpreters / compilers.  Those
+without it can save/load a text form that will be provided by item
+"b", although this is somewhat clunky.
+
