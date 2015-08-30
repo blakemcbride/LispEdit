@@ -24,6 +24,7 @@
 	   "EDITS"
 	   "LOAD"
 	   "MAKEFILE"))
+(IN-PACKAGE "LISPEDIT")
 
 (DEFPARAMETER *PACKAGE-SPECIAL* '(
 				  (SHADOW 'DEFMACRO)
@@ -77,6 +78,16 @@
      (EVAL EXP)
      (GO LOOP))))
 
+(DEFUN IS-FUNCTION (SYMBOL)
+   (AND (FBOUNDP SYMBOL)
+            (NOT (MACRO-FUNCTION SYMBOL))
+            (NOT (SPECIAL-OPERATOR-P SYMBOL))))
+
+(DEFUN IS-MACRO (SYMBOL)
+   (AND (FBOUNDP SYMBOL)
+            (MACRO-FUNCTION SYMBOL)
+            (NOT (SPECIAL-OPERATOR-P SYMBOL))))
+
 (DEFUN MAKEFILE (FNAME)
   (WITH-OPEN-FILE (S FNAME :DIRECTION :OUTPUT :IF-EXISTS :OVERWRITE :IF-DOES-NOT-EXIST :CREATE)
     (MAPC (LAMBDA (X) (PRINT X S)(TERPRI S)) *PACKAGE-SPECIAL*)
@@ -105,7 +116,6 @@
 	 (TERPRI S)))
   FNAME)
 			 
-
 (DEFMACRO INTH (L N)
   `(NTHCDR (1- ,N) ,L))
 
@@ -115,12 +125,12 @@
 (DEFMACRO COM-READ (CMD)
   `(PROG (RET)
      (COND ((NULL ,CMD)
-	    (PRINC "* " *QUERY-IO*)
+	    (PRINC "EDIT> " *QUERY-IO*)
+	    (FINISH-OUTPUT *QUERY-IO*)
 	    (RETURN (READ *QUERY-IO*)))
 	   (T (SETQ RET (CAR ,CMD))
 	      (SETQ ,CMD (CDR ,CMD))
 	      (RETURN RET)))))
-	    
 
 (DEFMACRO EDMSG (MSG)
   `(PROGN
@@ -160,6 +170,20 @@
 	   (SETQ ,A VAL))
       (RETURN ',A)))
 
+(DEFUN EDFIND1ST2 (A S TRC)
+  (PROG (RES)
+   LOOP (COND ((NLISTP S)
+	       (RETURN))
+	      ((EQUAL A (CAR S))
+	       (RETURN (CONS (CAR S) TRC)))
+	      ((SETQ RES
+		     (EDFIND1ST2 A
+				 (CAR S)
+				 (CONS (CAR S) TRC)))
+	       (RETURN RES))
+	      (T (SETQ S (CDR S))
+		 (GO LOOP)))))
+
 (DEFUN EDFIND1ST (A S TRC)
   (PROG (TEMP)
      (COND ((SETQ TEMP (MEMBER A (CDR S)))
@@ -183,20 +207,6 @@
 	    (RETURN TEMP))
 	   (T (GO LOOP)))))
   
-(DEFUN EDFIND1ST2 (A S TRC)
-  (PROG (RES)
-   LOOP (COND ((NLISTP S)
-	       (RETURN))
-	      ((EQUAL A (CAR S))
-	       (RETURN (CONS (CAR S) TRC)))
-	      ((SETQ RES
-		     (EDFIND1ST2 A
-				 (CAR S)
-				 (CONS (CAR S) TRC)))
-	       (RETURN RES))
-	      (T (SETQ S (CDR S))
-		 (GO LOOP)))))
-    
 (DEFUN EDITPR (X PP DEPTH CTLS)
   (LET ((*PRINT-LEVEL* DEPTH)
 	(*PRINT-PRETTY* PP))
@@ -214,9 +224,13 @@
 		       (TERPRI *QUERY-IO*))
 		   (T (PRIN1 X *QUERY-IO*)
 		      (TERPRI *QUERY-IO*)))))))
+
+(DEFUN EDSMASH (X A B)
+  (RPLACA X A)
+  (RPLACD X B))
   
 (DEFUN EDITS (S-ORIG &REST EDCOM)
-  (PROG (CL CTLS TEMP X A B L (S (COPY-TREE S-ORIG)) EXIT-TYPE)
+  (PROG (CL CTLS TEMP X A B L (S (COPY-TREE S-ORIG)))
      (AND (NLISTP S)
 	  (PRINT "NOT EDITABLE")
 	  (RETURN (VALUES NIL 'CANT-EDIT)))
@@ -256,11 +270,11 @@
 			  (SETQ CL (CAR TEMP))
 			  (SETQ CTLS TEMP))
 			 (T (GO ILLG))))
-		(: (SETQ EDCOM
+		(= (SETQ EDCOM
 			 (CONS 'UP
 			       (CONS (CONS 1 L) EDCOM))))
 		(MBD (SETQ EDCOM
-			   (CONS (CONS ': (SUBST CL '* L))
+			   (CONS (CONS '= (SUBST CL '* L))
 				 (CONS 1 EDCOM))))
 		(XTR (SETQ EDCOM
 			   (APPEND
@@ -268,9 +282,9 @@
 			     '(MARK LISPF4-XTR)
 			     (APPEND L
 				     '(S LISPF4-XTR
-				       (\ LISPF4-XTR)
+				       (/ LISPF4-XTR)
 				       (US LISPF4-XTR
-					(: LISPF4-XTR)))))
+					(= LISPF4-XTR)))))
 			    EDCOM)))
 		(B (SETQ EDCOM
 			 (APPEND
@@ -356,7 +370,7 @@
 			  (LIST 0
 				(CASE TEMP
 				  (1 '(1 NIL))
-				  (OTHERWISE (CONS TEMP))))
+				  (OTHERWISE (CONS TEMP NIL))))
 			  EDCOM)))
 		  (T (EDSMASH CL (CADR CL)
 			      (CDDR CL)))))
@@ -440,17 +454,3 @@
      EMPTY
      (EDMSG "LIST EMPTY")))
   
-(DEFUN EDSMASH (X A B)
-  (RPLACA X A)
-  (RPLACD X B))
-
-(DEFUN IS-FUNCTION (SYMBOL)
-   (AND (FBOUNDP SYMBOL) 
-            (NOT (MACRO-FUNCTION SYMBOL))
-            (NOT (SPECIAL-OPERATOR-P SYMBOL))))
-
-(DEFUN IS-MACRO (SYMBOL)
-   (AND (FBOUNDP SYMBOL) 
-            (MACRO-FUNCTION SYMBOL)
-            (NOT (SPECIAL-OPERATOR-P SYMBOL))))
-

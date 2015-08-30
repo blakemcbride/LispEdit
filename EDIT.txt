@@ -61,7 +61,7 @@ Expression editing:
 	(B e1 ...)       Adds e1 ... BEFORE cexpr.
   Replacing:
         (n e1 ...)       n >= 1 replaces the n'th expression by e1 ...
-        (: e1 ...)       Replaces the entire current expression by e1 ...
+        (= e1 ...)       Replaces the entire current expression by e1 ...
         (R x y)          All occurrences of x are replaced by y in cexpr.
         (MBD e1 ...)     Replace cexpr with e1 ... and allow * to represent
 	                 the original expression.
@@ -80,7 +80,7 @@ Expression editing:
 
   Deletions:
         (n)              n >= 1 deletes the n'th expression of cexpr
-	(:)              Delete the current expression.
+	(=)              Delete the current expression.
 
   Global editing:
 
