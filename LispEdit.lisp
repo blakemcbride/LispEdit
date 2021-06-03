@@ -6,7 +6,7 @@
 ;;     All rights reserved.
 
 ;; It was subsequently enhanced and converted to Common Lisp by:
-;;     Copyright (c) 2015 Blake McBride (blake@mcbride.name)
+;;     Copyright (c) 2015 Blake McBride (blake@mcbridemail.com)
 
 ;; It is released under the license that accompanies this file.
 
@@ -23,7 +23,8 @@
 	   "EDITP"
 	   "EDITS"
 	   "LOAD"
-	   "MAKEFILE"))
+	   "MAKEFILE"
+	   "SAVE-IMAGE"))
 (IN-PACKAGE "LISPEDIT")
 
 (DEFPARAMETER *PACKAGE-SPECIAL* '(
@@ -454,3 +455,7 @@
      EMPTY
      (EDMSG "LIST EMPTY")))
   
+#+:sbcl (defmacro save-image (file) `(sb-ext:save-lisp-and-die ,file))
+#+:clisp (defmacro save-image (file) `(saveinitmem ,file))
+#+:ccl (defmacro save-image (file) `(ccl:save-application ,file))
+

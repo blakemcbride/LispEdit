@@ -41,5 +41,5 @@ code represents a small effort to create an environment that would render
 the structure editor useful.
 
 Blake McBride
-blake@mcbride.name
+blake@mcbridemail.com
 
