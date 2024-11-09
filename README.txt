@@ -1,3 +1,4 @@
+*LISP Editor*
 
 The included code attempts to create an image based development
 environment as described in the file named ImageBasedDevelopment.txt
@@ -39,6 +40,8 @@ I suppose currently the real value in this package is the structure
 editor.  That is pretty complete and useful.  Much of the rest of the
 code represents a small effort to create an environment that would render
 the structure editor useful.
+
+Source code for this system is available at:  [https://github.com/blakemcbride/LispEdit](https://github.com/blakemcbride/LispEdit)
 
 Blake McBride
 blake@mcbridemail.com
