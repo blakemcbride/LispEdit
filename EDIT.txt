@@ -13,10 +13,11 @@ Note that indexing of n'th element begins at 1, not 0.
  
 Several edit functions are implemented:
  
-        (EDITF fn edcom)      edit a function or macro.  Value = NIL.
+        (EDITF fn edcom)      edit a function or macro.  Value = fn.
         (EDITS s edcom)       edit any s-expr.  Value = s
-	(EDITV v edcom)       edit variable v
-	(EDITP s edcom)       edit the property list associated with s
+	(EDITV v edcom)       edit variable v.  Value = v.
+	(EDITP s edcom)       edit the property list associated with s.
+	                      Value = s.
                               edcom = list of edit commands
                               (or NIL).  If edcom is non-NIL the commands
 	                      will be executed and the editor will exit.
@@ -128,4 +129,30 @@ Evaluation:
 	(ESET x c1...)   Sets atom x to the edit commands c1...
 	x                Executes the edit commands associates with atom x.
 	(ESET x)         Disassociates all edit commands from atom x.
- 
+
+Utility functions:
+
+	(LOAD fname)     Load a file using the custom DEFUN and DEFMACRO
+	                 so that loaded functions and macros can be edited.
+
+	(MAKEFILE fname) Write all user-defined functions, macros, and
+	(MAKEFILE fname pkg)
+	                 variables to a file suitable for reloading with
+	                 LOAD.  If pkg is not specified, the current
+	                 package is used.
+
+	(SAVE-IMAGE fname)
+	                 Save the current Lisp image to a file.
+	                 Supported on SBCL, CLISP, and CCL.
+
+Notes on Common Lisp adaptation:
+
+        The LISPF4 editor used (: e1 ...) and (:) for replacing and
+        deleting the current expression.  Since ":" is the package
+        marker in Common Lisp, these have been changed to (= e1 ...)
+        and (=).
+
+        Similarly, LISPF4 used (\ atm) to go to a marked position.
+        Since "\" is the escape character in Common Lisp, this has
+        been changed to (/ atm).
+
